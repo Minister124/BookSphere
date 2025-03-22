@@ -6,13 +6,13 @@ namespace BookSphere.Models;
 public class CartItem
 {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         [Required]
-        public int CartId { get; set; }
+        public Guid CartId { get; set; }
         
         [Required]
-        public int BookId { get; set; }
+        public Guid BookId { get; set; }
         
         [Required]
         [Range(1, 100)]
