@@ -50,4 +50,6 @@ public class Order
 
         [ForeignKey("UserId")]
         public virtual User User {get; set;}
+
+        public virtual ICollection<OrderItem> OrderItems {get; set;}
 }

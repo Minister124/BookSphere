@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookSphere.Models;
 
@@ -34,4 +35,9 @@ public class Announcement
 
         [DataType(DataType.DateTime)]
         public DateTime CreatedDate {get; set;} = DateTime.UtcNow;
+
+        public Guid CreatedById {get; set;}
+
+        [ForeignKey("CreatedById")]
+        public virtual User CreatedBy { get; set; }
 }

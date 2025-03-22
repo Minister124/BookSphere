@@ -42,4 +42,7 @@ public class User
         public bool HasStackableDiscount {get; set;}
 
         public virtual ICollection<Order> Orders {get; set;}
+        public virtual ICollection<Review> Reviews {get; set;}
+        public virtual WhiteList WhiteList {get; set;}
+        public virtual Cart Cart {get; set;}
 }
