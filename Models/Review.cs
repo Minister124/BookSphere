@@ -16,5 +16,5 @@ public class Review
 
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime ReviewDate {get; set;} = DateTime.UtcNow
+        public DateTime ReviewDate {get; set;} = DateTime.UtcNow;
 }
