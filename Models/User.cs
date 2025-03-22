@@ -40,4 +40,6 @@ public class User
 
         public int SuccessfulOrder {get; set;}
         public bool HasStackableDiscount {get; set;}
+
+        public virtual ICollection<Order> Orders {get; set;}
 }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookSphere.Models;
 
-public class WishListItem
+public class WhiteListItem
 {
         [Key]
         public Guid Id {get; set;}

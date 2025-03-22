@@ -78,4 +78,9 @@ public class Book
         
         [StringLength(500)]
         public string ImageUrl {get; set;}
+
+        public virtual ICollection<Review> Reviews {get; set;}
+        public virtual ICollection<OrderItem> OrderItems {get; set;}
+        public virtual ICollection<WhiteListItem> WhiteListItems {get; set;}
+        public virtual ICollection<CartItem> CartItems {get; set;}
 }

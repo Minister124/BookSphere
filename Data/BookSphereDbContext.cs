@@ -28,5 +28,9 @@ public class BookSphereDbContext : DbContext
         modelBuilder.Entity<User>()
                 .HasIndex(u => u.EmailAddress)
                 .IsUnique();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.MembershipId)
+            .IsUnique()
+            .HasFilter("\"MembershipId\" is not null");
     }
 }

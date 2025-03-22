@@ -10,6 +10,9 @@ public class Order
         public Guid Id {get; set;}
 
         [Required]
+        public Guid UserId {get; set;}
+
+        [Required]
         [StringLength(50)]
         public string ClaimCode {get; set;}
 
@@ -44,4 +47,7 @@ public class Order
 
         [StringLength(500)]
         public string Notes {get; set;}
+
+        [ForeignKey("UserId")]
+        public virtual User User {get; set;}
 }
