@@ -41,8 +41,8 @@ public class User
         public int SuccessfulOrder {get; set;}
         public bool HasStackableDiscount {get; set;}
 
-        public virtual ICollection<Order> Orders {get; set;}
-        public virtual ICollection<Review> Reviews {get; set;}
-        public virtual WhiteList WhiteList {get; set;}
-        public virtual Cart Cart {get; set;}
+        public virtual ICollection<Order> Orders {get; set;} // is collection navigation
+        public virtual ICollection<Review> Reviews {get; set;} // is collection navigation
+        public virtual WhiteList WhiteList {get; set;} // is reference navigation
+        public virtual Cart Cart {get; set;} // is reference navigation
 }
