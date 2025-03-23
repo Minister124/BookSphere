@@ -1,5 +1,6 @@
 using System.Text;
 using BookSphere.Data;
+using BookSphere.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -81,5 +82,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseCors("AllowReactApp");
+
+app.MapHub<BookHubs>("/bookshpere");
 
 app.Run();
