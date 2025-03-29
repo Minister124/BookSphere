@@ -1,6 +1,7 @@
 using System.Text;
 using BookSphere.Data;
 using BookSphere.Hubs;
+using BookSphere.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -67,7 +68,7 @@ builder.Services.AddCors(options =>
                 policy.WithOrigins(builder.Configuration["AllowedOrigins"]!.Split(';'))
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .AllowCredentials();
+                        .AllowCredentials(); //Need this for signalR
                 });
 });
 
@@ -77,12 +78,14 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ErrorHandlingMiddleware>(); //for handling errors and exceptions
+
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.UseCors("AllowReactApp");
 
-app.MapHub<BookHubs>("/bookshpere");
+app.MapHub<BookHubs>("/bookshpere"); //sends to everyone of domain that has /booksphere
 
 app.Run();
