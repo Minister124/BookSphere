@@ -1,7 +1,7 @@
 using System;
 using BookSphere.Models;
 
-namespace BookSphere.Services.IServices;
+namespace BookSphere.IServices;
 
 public interface IJwtService
 {

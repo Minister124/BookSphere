@@ -74,6 +74,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
+builder.Services.AddAutoMapper(typeof(Program)); // Using auto mapper
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
