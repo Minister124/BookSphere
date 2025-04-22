@@ -18,9 +18,7 @@
   <ItemGroup>
     <Folder Include="Controllers/" />
     <Folder Include="Hubs/" />
-    <Folder Include="Mapping/" />
     <Folder Include="Middleware/" />
-    <Folder Include="Services/" />
     <Folder Include="Validators/" />
   </ItemGroup>
 
