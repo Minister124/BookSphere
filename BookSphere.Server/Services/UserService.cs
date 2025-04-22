@@ -68,42 +68,94 @@ public class UserService : IUserService
 
           public async Task<AuthResponse> LoginAsync(LoginDto login)
           {
-                    return new AuthResponse{};
+                    //Find user by email
+                    var user = await _context.Users.SingleOrDefaultAsync(u => u.EmailAddress == login.Email);
+
+                    if (user == null ||  !VerifyPassword(login.Password, user.PasswordHash)) throw new UnauthorizedAccessException("Invalid email or password");
+
+                    var token = _jwtService.GenerateToken(user);
+
+                    return new AuthResponse
+                    {
+                              Token = token,
+                              User = _mapper.Map<UserDto>(user)
+                    };
           }
 
           public async Task<UserDto> GetUserProfileAsync(Guid userId)
           {
-                    throw new NotImplementedException();
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user == null) throw new KeyNotFoundException("User not found");
+
+                    return _mapper.Map<UserDto>(user);
           }
 
           public async Task<UserDto> UpdateUserProfileAsync(Guid userId, UserDto userDto)
           {
-                    throw new NotImplementedException();
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if(user == null) throw new KeyNotFoundException("User not found");
+
+                    //update user properties
+                    user.FullName = userDto.FullName;
+                    user.Phone = userDto.PhoneNumber;
+                    user.Address = userDto.Address;
+
+                    //save changes
+                    await _context.SaveChangesAsync();
+
+                    return _mapper.Map<UserDto>(user);
           }
 
-          public async Task<bool> AssignRoleAsync(Guid userId, string Role)
+          public async Task<bool> AssignRoleAsync(Guid userId, string role)
           {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user == null) throw new KeyNotFoundException("User not found");
+
+                    if(role != "Admin" && role != "Staff" && role != "Member") throw new ArgumentException("Invalid role");
+
+                    user.Role = role;
+                    await _context.SaveChangesAsync();
+
                     return true;
           }
 
           public async Task<bool> IfUserExist(Guid userId)
           {
-                    throw new NotImplementedException();
+                    return await _context.Users.AnyAsync(u => u.Id == userId);
           }
 
           public async Task<int> GetSuccessfulOrderCount(Guid userId)
           {
-                    throw new NotImplementedException();
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user == null) throw new KeyNotFoundException("User not found");
+
+                    return user.SuccessfulOrder;
           }
 
           public async Task<bool> HasStackableDiscount(Guid userId)
           {
-                    throw new NotImplementedException();
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user == null) throw new KeyNotFoundException("User not found");
+
+                    return user.HasStackableDiscount;
           }
 
           public async Task<bool> UseStackableDiscount(Guid userId)
           {
-                    throw new NotImplementedException();
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user == null) throw new KeyNotFoundException("User not found");
+
+                    if (!user.HasStackableDiscount) return false;
+
+                    await _context.SaveChangesAsync();
+
+                    return true;
           }
 
           private string HashPassword(string password)

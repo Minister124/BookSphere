@@ -14,7 +14,7 @@ public interface IUserService
             Task<UserDto> UpdateUserProfileAsync(Guid userId, UserDto user);
 
             //Role Management for admin
-            Task<bool> AssignRoleAsync(Guid userId, string Role);
+            Task<bool> AssignRoleAsync(Guid userId, string role);
 
             //Check if user exist
             Task<bool> IfUserExist(Guid userId);
