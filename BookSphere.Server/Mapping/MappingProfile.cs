@@ -71,5 +71,15 @@ public class MappingProfile : Profile
                                         opt => opt.MapFrom(src => src.Book.Price - (src.Book.Price * src.Book.DiscountPercentage / 100)))
                               .ForMember(dest => dest.Subtotal,
                                         opt => opt.MapFrom(src => (src.Book.Price - (src.Book.Price * src.Book.DiscountPercentage / 100)) * src.Quantity));
+
+                    // Order Mappings
+                    CreateMap<Order, OrderDto>()
+                              .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderItems))
+                              .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.TotalAmount - src.FinalAmount));
+                    CreateMap<OrderItem, OrderItemDto>()
+                              .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book.Title))
+                              .ForMember(dest => dest.BookAuthor, opt => opt.MapFrom(src => src.Book.Author))
+                              .ForMember(dest => dest.BookISBN, opt => opt.MapFrom(src => src.Book.ISBN))
+                              .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.SubTotal));
           }
 }
