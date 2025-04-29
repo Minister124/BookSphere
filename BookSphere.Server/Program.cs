@@ -1,12 +1,18 @@
 using System.Text;
 using BookSphere.Data;
+using BookSphere.IServices;
+using BookSphere.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+        .AddJsonOptions(Options =>
+        {
+                Options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        });
 
 builder.Services.AddDbContext<BookSphereDbContext>(options =>
         options.UseNpgsql(
@@ -73,6 +79,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(Program)); // Using auto mapper
+
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IWhiteListService, WhiteListService>();
 
 var app = builder.Build();
 
