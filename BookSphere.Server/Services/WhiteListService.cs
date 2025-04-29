@@ -90,18 +90,69 @@ public class WhiteListService : IWhiteListService
                     return _mapper.Map<WhiteListDto>(whiteList);
           }
 
-          public Task<bool> IsInWhiteListAsync(Guid userId, Guid bookId)
+          // Only check if any book item is in whitelist or not.
+          public async Task<bool> IsInWhiteListAsync(Guid userId, Guid bookId)
           {
-                    throw new NotImplementedException();
+                    // Check if user exists
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User not found");
+
+                    //Get whitelist of user
+                    var whiteList = await _context.WhiteLists
+                              .Include(w => w.WhiteListItems)
+                              .FirstOrDefaultAsync(w => w.UserId == userId);
+                    
+                    //check if whitelist is null
+                    if(whiteList == null)
+                    {
+                              return false;
+                    }
+
+                    // check if book is in whitelist and return
+                    return whiteList.WhiteListItems.Any(w => w.BookId == bookId);
           }
 
-          public Task<CartDto> MoveTOCartAsync(Guid userId, Guid bookId, int quantity)
-          {
-                    throw new NotImplementedException();
+          public async Task<CartDto> MoveTOCartAsync(Guid userId, Guid bookId, int quantity)
+          { 
+                   //check if user exist
+                   if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User not found");
+
+                   //check if book item is in whitelist
+                   if(!await IsInWhiteListAsync(userId, bookId)) throw new KeyNotFoundException("Item is not in whitelist");
+
+                    var addToCart = new AddToCartDto
+                    {
+                              BookId = bookId,
+                              Quantity = quantity
+                    };
+
+                    var cartDto = await _cartService.AddToCartAsync(userId, addToCart);
+
+                    await RemoveFromWhiteListAsync(userId, bookId);
+
+                    return cartDto; 
           }
 
-          public Task<WhiteListDto> RemoveFromWhiteListAsync(Guid userId, Guid bookId)
+          public async Task<WhiteListDto> RemoveFromWhiteListAsync(Guid userId, Guid bookId)
           {
-                    throw new NotImplementedException();
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User not found");
+                    
+                    //Get whitelist
+                    var whiteList = await _context.WhiteLists
+                              .Include(W => W.WhiteListItems)
+                              .FirstOrDefaultAsync(W => W.UserId == userId);
+                    
+                    if(whiteList == null) throw new KeyNotFoundException("WhiteList Not Found");
+
+                    var whiteListItem = whiteList.WhiteListItems.FirstOrDefault(i => i.BookId == bookId);
+
+                    if (whiteListItem == null) throw new KeyNotFoundException("Book not found in Whitelist");
+
+                    // Remove item from whitelist
+                    whiteList.WhiteListItems.Remove(whiteListItem);
+                    _context.WhiteListsItems.Remove(whiteListItem);
+
+                    await _context.SaveChangesAsync();
+
+                    return await GetWhiteLisTAsync(userId);
           }
 }
