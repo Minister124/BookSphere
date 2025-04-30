@@ -48,7 +48,18 @@ namespace BookSphere.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<int>> GetSuccessfulOrderCount()
         {
-            
+            var userId = GetUserId();
+            var count = await _userService.GetSuccessfulOrderCount(userId);
+
+            return Ok(count);
+        }
+
+        public async Task<ActionResult<bool>> HasStackableDiscount()
+        {
+            var userId = GetUserId();
+            var hasDiscount = await _userService.HasStackableDiscount(userId);
+
+            return Ok(hasDiscount);
         }
     }
 }
