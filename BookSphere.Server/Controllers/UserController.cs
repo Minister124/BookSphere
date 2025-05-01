@@ -53,7 +53,8 @@ namespace BookSphere.Controllers
 
             return Ok(count);
         }
-
+        [HttpGet("discount/stackable")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<bool>> HasStackableDiscount()
         {
             var userId = GetUserId();
