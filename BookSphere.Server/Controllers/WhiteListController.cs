@@ -51,5 +51,14 @@ namespace BookSphere.Controllers
 
             return Ok(whiteList);
         }
+
+        [HttpPost("move-to-cart/{bookId}")]
+        public async Task<ActionResult<CartDto>> MoveToCart(Guid bookId, [FromBody] int quantity)
+        {
+            var userId = GetUserId();
+            var cart = await _whiteListService.MoveTOCartAsync(userId, bookId, quantity);
+
+            return Ok(cart);
+        }
     }
 }
