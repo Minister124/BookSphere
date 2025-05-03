@@ -16,8 +16,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddDbContext<BookSphereDbContext>(options =>
         options.UseNpgsql(
-                builder.Configuration.GetConnectionString("DB"),
-                NpgSqlOptions => NpgSqlOptions.MigrationsAssembly("BookSphere")
+                builder.Configuration.GetConnectionString("DB")
         )
 );
 

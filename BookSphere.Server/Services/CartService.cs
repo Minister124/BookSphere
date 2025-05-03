@@ -26,18 +26,82 @@ public class CartService : ICartService
           public async Task<CartDto> AddToCartAsync(Guid userId, AddToCartDto addToCartDto)
           {
                     //check if user exist
+                    if(!await _userService.IfUserExist(userId))
+                    {
+                              throw new KeyNotFoundException("User not found");
+                    }
+
                     //check if book exists and is in stock
+                    if(!await _bookService.IsInStockAsync(addToCartDto.BookId, addToCartDto.Quantity))
+                    {
+                              throw new InvalidOperationException("Book is not in stock with the requested quantity");
+                    }
+
                     //Get Cart
+                    var cart = await _context.Carts
+                              .Include(c => c.Items)
+                              .FirstOrDefaultAsync(u => u.UserId == userId);
+                              
                     //Create Cart if it does not exist
+                    if(cart == null)
+                    {
+                              cart = new Cart
+                              {
+                                        UserId = userId,
+                                        LastUpdated = DateTime.UtcNow,
+                                        Items = new List<CartItem>()
+                              };
+                              await _context.Carts.AddAsync(cart);
+                    }
+                    
                     //check if item already exist in cart
-                    //update quantity else add new item
+                    var existingItem = cart.Items.FirstOrDefault(c => c.BookId == addToCartDto.BookId);
+
+                    if(existingItem != null)
+                    {
+                              //update quantity
+                              existingItem.Quantity += addToCartDto.Quantity;
+                              existingItem.AddedDate = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                              //Add new item
+                              var newItem = new CartItem
+                              {
+                                        CartId = cart.Id,
+                                        BookId = addToCartDto.BookId,
+                                        Quantity = addToCartDto.Quantity,
+                                        AddedDate = DateTime.UtcNow
+                              };
+                              cart.Items.Add(newItem);
+                    }
                     //update cart
+                    cart.LastUpdated = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    
                     //Get update cart with books
+                    return await GetCartAsync(userId);
           }
 
-          public Task<bool> ClearCartAsync(Guid userId)
+          public async Task<bool> ClearCartAsync(Guid userId)
           {
-                    throw new NotImplementedException();
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User not found");
+                    
+                    var cart = await _context.Carts
+                              .Include(c => c.Items)
+                              .FirstOrDefaultAsync(c => c.UserId == userId);
+                    if(cart == null)
+                    {
+                              throw new KeyNotFoundException("Cart Not Found");
+                    }
+
+                    _context.CartItems.RemoveRange(cart.Items); //delete all the items in cart item
+                    cart.Items.Clear(); //clear all the cart Items in cart
+
+                    cart.LastUpdated = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    return true;
           }
 
           public async Task<CartDto> GetCartAsync(Guid userId)
@@ -110,18 +174,81 @@ public class CartService : ICartService
                     }
           }
 
-          public Task<CartDto> RemoveFromCartAsync(Guid userId, Guid cartItemId)
+          public async Task<CartDto> RemoveFromCartAsync(Guid userId, Guid cartItemId)
           {
-                    throw new NotImplementedException();
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User not found");
+
+                    var cart = await _context.Carts
+                              .Include(c => c.Items)
+                              .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                    if(cart == null) throw new KeyNotFoundException("Cart Not Found");
+
+                    var cartItem = cart.Items.FirstOrDefault(i => i.Id == cartItemId);
+
+                    if(cartItem == null) throw new KeyNotFoundException("Cart Item Not Found");
+
+                    cart.Items.Remove(cartItem);
+                    _context.CartItems.Remove(cartItem);
+
+                    cart.LastUpdated = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    return await GetCartAsync(userId);
           }
 
-          public Task<CartDto> UpdateCartItemAsync(Guid userId, UpdateCartItemDto updateCartItemDto)
+          public async Task<CartDto> UpdateCartItemAsync(Guid userId, UpdateCartItemDto updateCartItemDto)
           {
-                    throw new NotImplementedException();
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User Not Found");
+
+                    var cart = await _context.Carts
+                              .Include(c => c.Items)
+                              .FirstOrDefaultAsync(u => u.UserId == userId);
+                    
+                    if(cart == null) throw new KeyNotFoundException("Cart not found");
+
+                    //Find Cart Items
+                    var cartItem = cart.Items.FirstOrDefault(i => i.Id == updateCartItemDto.CartItemId);
+
+                    if(cartItem == null)
+                    {
+                              throw new KeyNotFoundException("Item not found on cart");
+                    }
+
+                    // check if book is in stock with the new Quantity
+                    if(!await _bookService.IsInStockAsync(cartItem.BookId, updateCartItemDto.Quantity)) throw new InvalidOperationException("Book is not found in stock with this quantity");
+
+                    //update Quantity
+                    cartItem.Quantity = updateCartItemDto.Quantity;
+                    cartItem.AddedDate = DateTime.UtcNow;
+
+                    //Update Cart
+                    cart.LastUpdated = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    //Get updated cart with books
+                    return await GetCartAsync(userId);
           }
 
-          public Task<bool> ValidateCartAsync(Guid userId)
+          public async Task<bool> ValidateCartAsync(Guid userId)
           {
-                    throw new NotImplementedException();
+                    if(!await _userService.IfUserExist(userId)) throw new KeyNotFoundException("User Not Found");
+
+                    var cart = await _context.Carts
+                              .Include(c => c.Items)
+                              .ThenInclude(i => i.Book)
+                              .FirstOrDefaultAsync(c => c.UserId == userId);
+                    
+                    if(cart == null || !cart.Items.Any()) throw new InvalidOperationException("Cart is Empty");
+
+                    foreach(var item in cart.Items)
+                    {
+                              if(item.Book.StockQuantity < item.Quantity) 
+                              {
+                                        throw new InvalidOperationException($"Book {item.Book.Title} is not in stock with requested quantity");
+                              }
+                    }
+
+                    return true;
           }
 }
