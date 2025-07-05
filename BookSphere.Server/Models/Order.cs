@@ -29,7 +29,7 @@ public class Order
         public decimal TotalAmount {get; set;}  
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DecimalAmount {get; set;}  
+        public decimal DiscountAmount {get; set;}  // Renamed from DecimalAmount
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
